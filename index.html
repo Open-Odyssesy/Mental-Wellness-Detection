@@ -660,48 +660,42 @@
         }
 
         function calculateScores() {
-            const deprQ = [13, 14, 16];
+            const deprQ = [13, 14];
             const deprSum = deprQ.reduce((s, id) => s + (responses[id] || 0), 0);
-            assessmentData.scores.depression = Math.round((deprSum / (deprQ.length * 5)) * 100);
+            const energyScore = 6 - (responses[16] || 1);
+            assessmentData.scores.depression = Math.round(((deprSum + energyScore) / (deprQ.length + 1) / 5) * 100);
 
             const anxQ = [8, 18];
             const anxSum = anxQ.reduce((s, id) => s + (responses[id] || 0), 0);
             assessmentData.scores.anxiety = Math.round((anxSum / (anxQ.length * 5)) * 100);
 
-            assessmentData.scores.sleep = Math.round(((6 - (responses[15] || 0)) / 5) * 100);
+            assessmentData.scores.sleep = Math.round(((6 - (responses[15] || 1)) / 5) * 100);
 
-            const socQ = [10, 11, 17, 20];
-            const socSum = socQ.reduce((s, id) => {
-                let v = responses[id] || 0;
-                if (id === 17 || id === 20) v = 6 - v;
-                return s + v;
-            }, 0);
-            assessmentData.scores.social = Math.round((socSum / (socQ.length * 5)) * 100);
+            const socQ = [10, 11];
+            const socSum = socQ.reduce((s, id) => s + (responses[id] || 0), 0);
+            const socialSat = 6 - (responses[17] || 1);
+            const socialSupport = 6 - (responses[20] || 1);
+            assessmentData.scores.social = Math.round(((socSum + socialSat + socialSupport) / 4 / 5) * 100);
 
-            const funcQ = [7, 9, 19];
-            const funcSum = funcQ.reduce((s, id) => {
-                let v = responses[id] || 0;
-                if (id === 19) v = 6 - v;
-                return s + v;
-            }, 0);
-            assessmentData.scores.functioning = Math.round((funcSum / (funcQ.length * 5)) * 100);
+            const funcQ = [7, 9];
+            const funcSum = funcQ.reduce((s, id) => s + (responses[id] || 0), 0);
+            const copingScore = 6 - (responses[19] || 1);
+            assessmentData.scores.functioning = Math.round(((funcSum + copingScore) / (funcQ.length + 1) / 5) * 100);
 
-            const digQ = [3, 4, 5, 6, 12];
-            const digSum = digQ.reduce((s, id) => s + (responses[id] || 0), 0);
-            assessmentData.scores.digital = Math.round((digSum / (digQ.length * 5)) * 100);
+            const digQ = [4, 5, 6, 12];
+            let digSum = digQ.reduce((s, id) => s + (responses[id] || 0), 0);
+            const q3Response = responses[3] || 0;
+            digSum += q3Response;
+            assessmentData.scores.digital = Math.round((digSum / (digQ.length + 1) / 5) * 100);
 
-            const strQ = [18, 19];
-            const strSum = strQ.reduce((s, id) => {
-                let v = responses[id] || 0;
-                if (id === 19) v = 6 - v;
-                return s + v;
-            }, 0);
-            assessmentData.scores.stress = Math.round((strSum / (strQ.length * 5)) * 100);
+            const stressScore = responses[18] || 0;
+            const copingInverse = 6 - (responses[19] || 1);
+            assessmentData.scores.stress = Math.round(((stressScore + copingInverse) / 2 / 5) * 100);
 
             const avgNeg = (assessmentData.scores.depression + assessmentData.scores.anxiety +
                            assessmentData.scores.stress + (100 - assessmentData.scores.sleep) +
                            assessmentData.scores.digital + assessmentData.scores.functioning) / 6;
-            assessmentData.scores.overall = Math.round(100 - avgNeg);
+            assessmentData.scores.overall = Math.max(0, Math.min(100, Math.round(100 - avgNeg)));
         }
 
         function generateReport() {
@@ -712,7 +706,7 @@
             document.getElementById('assessmentPage').classList.remove('active');
             document.getElementById('reportPage').classList.add('active');
 
-            displayReport();
+            setTimeout(() => displayReport(), 100);
         }
 
         function displayReport() {
@@ -722,18 +716,18 @@
                 year: 'numeric', month: 'long', day: 'numeric'
             });
 
-            document.getElementById('overallScore').textContent = s.overall || '--';
+            document.getElementById('overallScore').textContent = s.overall || 0;
             const lbl = s.overall >= 70 ? 'Excellent Wellness' : s.overall >= 50 ? 'Moderate Wellness' : 'Needs Attention';
             document.getElementById('overallLabel').textContent = lbl;
 
             const dims = [
-                { name: 'Depression Resistance', score: 100 - (s.depression || 0), icon: '😔' },
-                { name: 'Anxiety Management', score: 100 - (s.anxiety || 0), icon: '😰' },
+                { name: 'Depression Resistance', score: Math.max(0, 100 - (s.depression || 0)), icon: '😔' },
+                { name: 'Anxiety Management', score: Math.max(0, 100 - (s.anxiety || 0)), icon: '😰' },
                 { name: 'Sleep Quality', score: s.sleep || 0, icon: '😴' },
-                { name: 'Social Connection', score: 100 - (s.social || 0), icon: '👥' },
-                { name: 'Daily Functioning', score: 100 - (s.functioning || 0), icon: '⚡' },
-                { name: 'Digital Wellbeing', score: 100 - (s.digital || 0), icon: '📱' },
-                { name: 'Stress Management', score: 100 - (s.stress || 0), icon: '😓' }
+                { name: 'Social Connection', score: Math.max(0, 100 - (s.social || 0)), icon: '👥' },
+                { name: 'Daily Functioning', score: Math.max(0, 100 - (s.functioning || 0)), icon: '⚡' },
+                { name: 'Digital Wellbeing', score: Math.max(0, 100 - (s.digital || 0)), icon: '📱' },
+                { name: 'Stress Management', score: Math.max(0, 100 - (s.stress || 0)), icon: '😓' }
             ];
 
             let dimsHTML = '';
