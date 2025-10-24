@@ -706,7 +706,7 @@
             document.getElementById('assessmentPage').classList.remove('active');
             document.getElementById('reportPage').classList.add('active');
 
-            displayReport();
+            setTimeout(() => displayReport(), 100);
         }
 
         function displayReport() {
@@ -716,18 +716,18 @@
                 year: 'numeric', month: 'long', day: 'numeric'
             });
 
-            document.getElementById('overallScore').textContent = s.overall || '--';
+            document.getElementById('overallScore').textContent = s.overall || 0;
             const lbl = s.overall >= 70 ? 'Excellent Wellness' : s.overall >= 50 ? 'Moderate Wellness' : 'Needs Attention';
             document.getElementById('overallLabel').textContent = lbl;
 
             const dims = [
-                { name: 'Depression Resistance', score: 100 - (s.depression || 0), icon: '😔' },
-                { name: 'Anxiety Management', score: 100 - (s.anxiety || 0), icon: '😰' },
+                { name: 'Depression Resistance', score: Math.max(0, 100 - (s.depression || 0)), icon: '😔' },
+                { name: 'Anxiety Management', score: Math.max(0, 100 - (s.anxiety || 0)), icon: '😰' },
                 { name: 'Sleep Quality', score: s.sleep || 0, icon: '😴' },
-                { name: 'Social Connection', score: 100 - (s.social || 0), icon: '👥' },
-                { name: 'Daily Functioning', score: 100 - (s.functioning || 0), icon: '⚡' },
-                { name: 'Digital Wellbeing', score: 100 - (s.digital || 0), icon: '📱' },
-                { name: 'Stress Management', score: 100 - (s.stress || 0), icon: '😓' }
+                { name: 'Social Connection', score: Math.max(0, 100 - (s.social || 0)), icon: '👥' },
+                { name: 'Daily Functioning', score: Math.max(0, 100 - (s.functioning || 0)), icon: '⚡' },
+                { name: 'Digital Wellbeing', score: Math.max(0, 100 - (s.digital || 0)), icon: '📱' },
+                { name: 'Stress Management', score: Math.max(0, 100 - (s.stress || 0)), icon: '😓' }
             ];
 
             let dimsHTML = '';
