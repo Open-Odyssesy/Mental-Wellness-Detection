@@ -40,7 +40,7 @@ def load_social_media_mental_health(data_path=None):
         raise FileNotFoundError(f"Data file not found at {data_path}")
 
     df = pd.read_csv(data_path)
-    print("✅ Loaded dataset")
+    print("Loaded dataset")
     print("Shape:", df.shape)
     return df
 
